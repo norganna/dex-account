@@ -9,7 +9,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"os"
 
 	"github.com/spf13/viper"
 )
@@ -39,14 +38,10 @@ func runServe(o *serveOptions) error {
 	o.ctx = context.Background()
 
 	if configFile := o.configFile; configFile != "" {
-		reader, err := os.Open(configFile)
-		if err != nil {
-			return fmt.Errorf("failed to read config file %s: %v", configFile, err)
-		}
-
-		err = viper.MergeConfig(reader)
-		if err != nil {
-			return fmt.Errorf("failed to merge config file %s: %v", configFile, err)
+		viper.SetConfigFile(configFile)
+		viper.AutomaticEnv()
+		if err := viper.ReadInConfig(); err != nil {
+			return fmt.Errorf("error reading config file: %s: %v", viper.ConfigFileUsed(), err)
 		}
 	}
 
